@@ -8,6 +8,11 @@ function screenSentence(ui) {
   switch (ui.screen) {
     case 'status': return 'Status screen open.';
     case 'feed': return 'Feed menu.';
+    case 'play': return `Play menu: ${ui.option === 0 ? 'Left or Right' : 'Higher or Lower'} selected.`;
+    case 'highlow': {
+      const choice = ui.option === 0 ? 'higher' : 'lower';
+      return `Higher or lower: number ${ui.shown}, round ${ui.rounds.length + 1} of ${ROUNDS}, guessing ${choice}.`;
+    }
     case 'guess': return `Mini-game: round ${ui.rounds.length + 1} of ${ROUNDS}.`;
     case 'result': return 'Mini-game finished.';
     default: return `Menu: ${capitalise(MENU[ui.menuIndex])}.`;

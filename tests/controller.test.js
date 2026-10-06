@@ -4,6 +4,14 @@ import { petAt } from './helpers.js';
 
 const low = () => 0.1; // left
 const select = (ui, name) => ({ ...ui, menuIndex: MENU.indexOf(name) });
+const nth = (n) => () => (n - 0.5) / 9; // draws the number n (1..9)
+
+// Opens the Play chooser and picks a game: 'guess' (option 0) or 'highlow' (option 1).
+function startGame(pet, game, rng = low) {
+  let state = press(select(createUi(), 'play'), pet, 'B', rng);
+  if (game === 'highlow') state = press(state.ui, state.pet, 'A', rng);
+  return press(state.ui, state.pet, 'B', rng);
+}
 
 describe('controller', () => {
   it('button A cycles the menu icon and wraps', () => {
@@ -58,14 +66,18 @@ describe('controller', () => {
       expect(shouldResetScreen(petAt('adult', { stage: 'dead' }), on('status'))).toBe(true);
       expect(shouldResetScreen(petAt('child', { asleep: true }), on('feed'))).toBe(true);
     });
-    it('a sick pet only loses the guess screen', () => {
+    it('a sick pet only loses the play chooser and the game screens', () => {
       const sick = petAt('child', { sick: true });
       expect(shouldResetScreen(sick, on('guess'))).toBe(true);
+      expect(shouldResetScreen(sick, on('highlow'))).toBe(true);
+      expect(shouldResetScreen(sick, on('play'))).toBe(true);
       expect(shouldResetScreen(sick, on('status'))).toBe(false);
       expect(shouldResetScreen(sick, on('feed'))).toBe(false);
     });
     it('leaves a healthy awake pet alone', () => {
-      expect(shouldResetScreen(petAt('child'), on('guess'))).toBe(false);
+      for (const screen of ['guess', 'highlow', 'play']) {
+        expect(shouldResetScreen(petAt('child'), on(screen))).toBe(false);
+      }
     });
   });
 
@@ -77,7 +89,7 @@ describe('controller', () => {
   });
 
   it('plays three guessing rounds and rewards a win', () => {
-    let { ui, pet } = press(select(createUi(), 'play'), petAt('child', { happiness: 2 }), 'B', low);
+    let { ui, pet } = startGame(petAt('child', { happiness: 2 }), 'guess');
     expect(ui.screen).toBe('guess');
     for (let i = 0; i < 3; i++) ({ ui, pet } = press(ui, pet, 'B', low)); // choice left, rng left
     expect(ui.screen).toBe('result');
@@ -85,6 +97,98 @@ describe('controller', () => {
     expect(pet.happiness).toBe(3);
     ({ ui } = press(ui, pet, 'B', low));
     expect(ui.screen).toBe('main');
+  });
+
+  describe('play chooser', () => {
+    const open = (pet = petAt('child')) => press(select(createUi(), 'play'), pet, 'B', low);
+
+    it('the Play icon opens a chooser with Left or Right selected', () => {
+      const { ui } = open();
+      expect(ui).toMatchObject({ screen: 'play', option: 0 });
+    });
+
+    it('A toggles between the two games', () => {
+      let { ui, pet } = open();
+      ({ ui, pet } = press(ui, pet, 'A', low));
+      expect(ui.option).toBe(1);
+      ({ ui } = press(ui, pet, 'A', low));
+      expect(ui.option).toBe(0);
+    });
+
+    it('C cancels back to main without starting a game', () => {
+      const { ui, pet } = open();
+      const out = press(ui, pet, 'C', low);
+      expect(out.ui.screen).toBe('main');
+      expect(out.ui.rounds).toEqual([]);
+    });
+
+    it('B on option 0 starts the guess game, as before', () => {
+      const { ui } = startGame(petAt('child'), 'guess');
+      expect(ui).toMatchObject({ screen: 'guess', option: 0, rounds: [] });
+    });
+
+    it('B on option 1 starts higher or lower with a number shown', () => {
+      const { ui } = startGame(petAt('child'), 'highlow', nth(5));
+      expect(ui).toMatchObject({ screen: 'highlow', option: 0, rounds: [], shown: 5 });
+    });
+
+    it('starts with no number shown', () => {
+      expect(createUi().shown).toBeNull();
+    });
+
+    it('still refuses a sick, sleeping or egg pet before the chooser opens', () => {
+      for (const pet of [petAt('child', { sick: true }), petAt('child', { asleep: true }), petAt('egg')]) {
+        expect(open(pet).ui.screen).toBe('main');
+      }
+    });
+  });
+
+  describe('higher or lower', () => {
+    it('B plays a round with the shown number and carries the new number forward', () => {
+      let { ui, pet } = startGame(petAt('child'), 'highlow', nth(5));
+      ({ ui, pet } = press(ui, pet, 'B', nth(8)));
+      expect(ui.rounds).toEqual([{ shown: 5, next: 8, choice: 'higher', won: true }]);
+      expect(ui.shown).toBe(8);
+      expect(ui.screen).toBe('highlow');
+    });
+
+    it('A switches the choice to lower', () => {
+      let { ui, pet } = startGame(petAt('child'), 'highlow', nth(5));
+      ({ ui, pet } = press(ui, pet, 'A', nth(5)));
+      expect(ui.option).toBe(1);
+      ({ ui } = press(ui, pet, 'B', nth(2)));
+      expect(ui.rounds[0]).toMatchObject({ choice: 'lower', won: true });
+    });
+
+    it('C cancels back to main without changing the pet', () => {
+      const child = petAt('child', { happiness: 2 });
+      const { ui, pet } = startGame(child, 'highlow', nth(5));
+      const out = press(ui, pet, 'C', nth(5));
+      expect(out.ui.screen).toBe('main');
+      expect(out.pet).toBe(pet);
+    });
+
+    it('rewards two wins out of three after the third round', () => {
+      let { ui, pet } = startGame(petAt('child', { happiness: 2 }), 'highlow', nth(5));
+      ({ ui, pet } = press(ui, pet, 'B', nth(8))); // higher, win
+      ({ ui, pet } = press(ui, pet, 'B', nth(9))); // higher, win
+      expect(ui.screen).toBe('highlow');
+      ({ ui, pet } = press(ui, pet, 'B', nth(1))); // higher, loss
+      expect(ui.screen).toBe('result');
+      expect(ui.result).toEqual({ wins: 2, won: true });
+      expect(ui.notice).toBe('You win! 😊');
+      expect(pet.happiness).toBe(3);
+      ({ ui } = press(ui, pet, 'B', nth(1)));
+      expect(ui.screen).toBe('main');
+    });
+
+    it('loses with a tie and changes nothing', () => {
+      let { ui, pet } = startGame(petAt('child', { happiness: 2 }), 'highlow', nth(5));
+      for (let i = 0; i < 3; i++) ({ ui, pet } = press(ui, pet, 'B', nth(5)));
+      expect(ui.screen).toBe('result');
+      expect(ui.notice).toBe('You lose…');
+      expect(pet.happiness).toBe(2);
+    });
   });
 
   it('refuses to play when sick, asleep or an egg', () => {
@@ -140,11 +244,11 @@ describe('controller', () => {
     });
 
     it('reports the guess game outcome', () => {
-      let { ui, pet } = press(select(createUi(), 'play'), petAt('child', { happiness: 2 }), 'B', low);
+      let { ui, pet } = startGame(petAt('child', { happiness: 2 }), 'guess');
       for (let i = 0; i < 3; i++) ({ ui, pet } = press(ui, pet, 'B', low));
       expect(ui.notice).toBe('You win! 😊');
       const lose = () => 0.9;
-      ({ ui, pet } = press(select(createUi(), 'play'), petAt('child'), 'B', lose));
+      ({ ui, pet } = startGame(petAt('child'), 'guess', lose));
       for (let i = 0; i < 3; i++) ({ ui, pet } = press(ui, pet, 'B', lose));
       expect(ui.notice).toBe('You lose…');
     });

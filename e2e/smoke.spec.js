@@ -78,3 +78,33 @@ test('music toggle works independently of sound and persists across a reload', a
 
   expect(errors).toEqual([]);
 });
+
+test('Play opens a chooser for two mini-games; C cancels back to main', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+
+  await page.goto('/?speed=600'); // an egg refuses to play, so hatch it first
+  const lcd = page.locator('#lcd');
+  await expect(lcd).toHaveAttribute('data-stage', 'baby', { timeout: 5000 });
+  await page.goto('/?speed=1'); // then stop the clock from interfering
+
+  await page.click('button[data-menu="play"]');
+  await page.click('[data-button="B"]');
+  await expect(lcd).toHaveAttribute('data-screen', 'play');
+  await expect(lcd).toHaveAttribute('aria-label', /Play menu: Left or Right selected/);
+
+  await page.click('[data-button="C"]');
+  await expect(lcd).toHaveAttribute('data-screen', 'main');
+
+  await page.click('[data-button="B"]');
+  await page.click('[data-button="A"]'); // toggle to Higher or Lower
+  await expect(lcd).toHaveAttribute('aria-label', /Higher or Lower selected/);
+  await page.click('[data-button="B"]');
+  await expect(lcd).toHaveAttribute('data-screen', 'highlow');
+  await expect(lcd).toHaveAttribute('aria-label', /Higher or lower: number [1-9], round 1 of 3/);
+
+  await page.click('[data-button="C"]');
+  await expect(lcd).toHaveAttribute('data-screen', 'main');
+
+  expect(errors).toEqual([]);
+});

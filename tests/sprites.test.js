@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { SPRITES, ICONS, spriteFor } from '../src/ui/sprites.js';
+import { SPRITES, ICONS, DIGITS, spriteFor } from '../src/ui/sprites.js';
 
 const isRectangular = (rows) => rows.every((r) => r.length === rows[0].length && /^[#.]+$/.test(r));
 
@@ -33,5 +33,24 @@ describe('sprites', () => {
       expect(SPRITES[`${character}Adult`], character).toBeDefined();
       expect(SPRITES[`${character}Adult`], character).not.toEqual(SPRITES[character]);
     }
+  });
+
+  it('has a 3x5 bitmap for every digit', () => {
+    expect(Object.keys(DIGITS)).toEqual(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+    for (const [digit, rows] of Object.entries(DIGITS)) {
+      expect(isRectangular(rows), digit).toBe(true);
+      expect(rows.length, digit).toBe(5);
+      expect(rows[0].length, digit).toBe(3);
+    }
+    expect(new Set(Object.values(DIGITS).map((r) => r.join())).size).toBe(10);
+  });
+
+  it('has 7x4 up and down arrows', () => {
+    for (const name of ['arrowUp', 'arrowDown']) {
+      expect(isRectangular(ICONS[name]), name).toBe(true);
+      expect(ICONS[name].length, name).toBe(4);
+      expect(ICONS[name][0].length, name).toBe(7);
+    }
+    expect(ICONS.arrowUp).not.toEqual(ICONS.arrowDown);
   });
 });

@@ -1,13 +1,13 @@
-import { ICONS, spriteFor } from './sprites.js';
+import { ICONS, DIGITS, spriteFor } from './sprites.js';
 import { petOffset } from './pose.js';
 
 export const LCD = 32;
 const INK = '#2b3320';
 
-export function drawBitmap(ctx, rows, x, y) {
+export function drawBitmap(ctx, rows, x, y, scale = 1) {
   for (let r = 0; r < rows.length; r++) {
     for (let c = 0; c < rows[r].length; c++) {
-      if (rows[r][c] === '#') ctx.fillRect(x + c, y + r, 1, 1);
+      if (rows[r][c] === '#') ctx.fillRect(x + c * scale, y + r * scale, scale, scale);
     }
   }
 }
@@ -54,19 +54,40 @@ function drawFeed(ctx, ui) {
 }
 
 function drawGuess(ctx, ui) {
-  ui.rounds.forEach((round, i) => {
-    drawBitmap(ctx, round.won ? ICONS.heart : ICONS.heartEmpty, 7 + i * 8, 2);
-  });
+  drawRoundHearts(ctx, ui.rounds, 2);
   drawBitmap(ctx, ICONS.arrowLeft, 6, 12);
   drawBitmap(ctx, ICONS.arrowRight, 22, 12);
   if (ui.option === 0) drawUnderline(ctx, 6, 21, 4);
   else drawUnderline(ctx, 22, 21, 4);
 }
 
-function drawResult(ctx, ui) {
-  ui.rounds.forEach((round, i) => {
-    drawBitmap(ctx, round.won ? ICONS.heart : ICONS.heartEmpty, 7 + i * 8, 14);
+function drawRoundHearts(ctx, rounds, y) {
+  rounds.forEach((round, i) => {
+    drawBitmap(ctx, round.won ? ICONS.heart : ICONS.heartEmpty, 7 + i * 8, y);
   });
+}
+
+// Left or Right on the left, Higher or Lower on the right.
+function drawPlay(ctx, ui) {
+  drawBitmap(ctx, ICONS.arrowLeft, 2, 12);
+  drawBitmap(ctx, ICONS.arrowRight, 8, 12);
+  drawBitmap(ctx, ICONS.arrowUp, 21, 10);
+  drawBitmap(ctx, ICONS.arrowDown, 21, 15);
+  if (ui.option === 0) drawUnderline(ctx, 2, 22, 10);
+  else drawUnderline(ctx, 21, 22, 7);
+}
+
+function drawHighLow(ctx, ui) {
+  drawRoundHearts(ctx, ui.rounds, 2);
+  drawBitmap(ctx, DIGITS[ui.shown], 11, 8, 3); // 3x5 at scale 3 is 9x15, centred on 32
+  drawBitmap(ctx, ICONS.arrowUp, 5, 25);
+  drawBitmap(ctx, ICONS.arrowDown, 20, 25);
+  if (ui.option === 0) drawUnderline(ctx, 5, 30, 7);
+  else drawUnderline(ctx, 20, 30, 7);
+}
+
+function drawResult(ctx, ui) {
+  drawRoundHearts(ctx, ui.rounds, 14);
 }
 
 export function render(ctx, pet, ui, frame) {
@@ -75,6 +96,8 @@ export function render(ctx, pet, ui, frame) {
   switch (ui.screen) {
     case 'status': return drawStatus(ctx, pet);
     case 'feed': return drawFeed(ctx, ui);
+    case 'play': return drawPlay(ctx, ui);
+    case 'highlow': return drawHighLow(ctx, ui);
     case 'guess': return drawGuess(ctx, ui);
     case 'result': return drawResult(ctx, ui);
     default: return drawMain(ctx, pet, frame);

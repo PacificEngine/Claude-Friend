@@ -65,4 +65,18 @@ describe('describePet', () => {
     expect(describePet(pet, ui({ screen: 'result' }))).toMatch(/Mini-game finished\.$/);
     expect(describePet(pet, ui({ screen: 'status' }))).not.toContain('Menu:');
   });
+
+  it('describes the play chooser with the selected game', () => {
+    const pet = petAt('child');
+    expect(describePet(pet, ui({ screen: 'play', option: 0 }))).toMatch(/Play menu: Left or Right selected\.$/);
+    expect(describePet(pet, ui({ screen: 'play', option: 1 }))).toMatch(/Play menu: Higher or Lower selected\.$/);
+  });
+
+  it('describes higher or lower with the number, round and current choice', () => {
+    const pet = petAt('child');
+    expect(describePet(pet, ui({ screen: 'highlow', shown: 5, rounds: [{}], option: 0 })))
+      .toMatch(/Higher or lower: number 5, round 2 of 3, guessing higher\.$/);
+    expect(describePet(pet, ui({ screen: 'highlow', shown: 9, rounds: [], option: 1 })))
+      .toMatch(/Higher or lower: number 9, round 1 of 3, guessing lower\.$/);
+  });
 });
