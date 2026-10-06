@@ -20,5 +20,10 @@ test('egg hatches, can be fed, and survives a reload', async ({ page }) => {
   await expect(lcd).toHaveAttribute('data-stage', 'baby');
   await expect(lcd).toHaveAttribute('data-hunger', '4');
 
+  // A button that does nothing must still say why.
+  await page.click('[data-button="A"]'); // light
+  await page.click('[data-button="B"]');
+  await expect(page.locator('#notice')).toHaveText("It's daytime");
+
   expect(errors).toEqual([]);
 });
