@@ -48,13 +48,13 @@ A **care mistake** is recorded when:
 - a sickness, two or more poop piles, or misbehaving goes unattended for 60 game minutes, or
 - the light is still on at 22:30.
 
-Each episode counts once. Care mistakes and discipline decide which of four characters your pet becomes when it reaches the teen stage and again as an adult:
+Each episode counts once. Which of four characters your pet becomes is decided when it reaches the teen stage and again as an adult, from its care mistakes **per day of life** (total mistakes divided by its age in days, counting any age under one day as one day) and its discipline:
 
 | Character | Needs |
 | --- | --- |
-| Sparky | at most 1 care mistake and discipline of 3 or more |
-| Bubbles | at most 3 care mistakes |
-| Mochi | at most 6 care mistakes |
+| Sparky | at most 1 care mistake per day and discipline of 3 or more |
+| Bubbles | at most 4 care mistakes per day |
+| Mochi | at most 10 care mistakes per day |
 | Grumble | anything worse |
 
 ### Death
@@ -97,6 +97,10 @@ The first time, install the browser Playwright uses: `yarn playwright install ch
 ## Balance simulation
 
 `yarn simulate` is a dev tool, not part of the game. It plays three bot caretakers (attentive, casual, neglectful) through the pure engine for 200 seeded lives each and prints a table: how many reach teen and adult, how they die, lifespan, care mistakes and which characters appear. Use `yarn simulate --runs=N` to change the number of lives per bot. It never changes game numbers; edit `src/engine/constants.js` and re-run it to see the effect of a tweak.
+
+### Balance notes
+
+Besides survival and lifespan, `yarn simulate` prints, per bot, the mean care mistakes by cause (light, ignored call, zero hearts), the mean mistakes and age at the moment the pet becomes a teen and an adult, and the characters reached. The character thresholds are tuned against it. The target outcomes are: the attentive bot becomes Sparky (at least 95% of lives); the casual bot (three short daily check-ins, never touches the light, about 7 mistakes a day) mostly becomes Bubbles or Mochi (at least 70% combined, at most 25% Grumble); and the neglectful bot dies before it gets a character. `tests/simulate.test.js` checks these over a fixed range of seeds.
 
 ## Project layout
 
