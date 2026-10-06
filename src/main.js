@@ -5,6 +5,7 @@ import { MAX_OFFLINE_MINUTES, SUSPENDED_AFTER_MINUTES, DEFAULT_SPEED } from './e
 import { loadPet, save } from './storage/storage.js';
 import { render } from './ui/render.js';
 import { createUi, press, MENU, shouldResetScreen, selectMenu } from './ui/controller.js';
+import { describePet } from './ui/describe.js';
 import { createSound } from './ui/sound.js';
 
 const speed = Number(new URLSearchParams(location.search).get('speed')) || DEFAULT_SPEED; // ?speed=60 is the fast mode
@@ -30,6 +31,8 @@ function persist() {
   }
 }
 
+let lastLabel = '';
+
 function draw() {
   render(ctx, pet, ui, Math.floor(Date.now() / 500));
   document.querySelectorAll('[data-menu]').forEach((el) => {
@@ -38,6 +41,11 @@ function draw() {
     if (active) el.setAttribute('aria-current', 'true');
     else el.removeAttribute('aria-current');
   });
+  const label = describePet(pet, ui);
+  if (label !== lastLabel) {
+    canvas.setAttribute('aria-label', label);
+    lastLabel = label;
+  }
   Object.assign(canvas.dataset, { screen: ui.screen, stage: pet.stage, hunger: pet.hunger, happiness: pet.happiness });
 }
 

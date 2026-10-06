@@ -9,6 +9,7 @@ test('egg hatches, can be fed, and survives a reload', async ({ page }) => {
 
   await expect(lcd).toHaveAttribute('data-stage', 'egg');
   await expect(lcd).toHaveAttribute('data-stage', 'baby', { timeout: 5000 });
+  await expect(lcd).toHaveAttribute('aria-label', /Baby/i);
 
   await expect(lcd).toHaveAttribute('data-hunger', '3', { timeout: 10000 });
   await page.click('[data-button="B"]'); // open feed menu (feed is the first icon)
