@@ -12,5 +12,12 @@ body { margin: 0; min-height: 100vh; display: grid; place-items: center; backgro
 .buttons button { width: 56px; height: 56px; border-radius: 50%; border: 0; background: #f7d046; font-weight: 700; font-size: 18px; box-shadow: 0 4px 0 rgba(0,0,0,.25); cursor: pointer; }
 .buttons button:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.25); }
 .mute { border: 0; background: transparent; color: #fff; cursor: pointer; font-size: 12px; }
-.toggles { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; }
+.toggles { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 10px; }
 .notice { margin: 0; min-height: 1.4em; color: #fff; font-size: 14px; font-weight: 600; text-align: center; text-shadow: 0 1px 0 rgba(0,0,0,.25); }
+dialog { width: min(280px, 90vw); padding: 20px; border: 0; border-radius: 12px; background: #fff; color: #222; box-shadow: 0 10px 24px rgba(0,0,0,.4); }
+dialog::backdrop { background: rgba(0,0,0,.5); }
+dialog p { margin: 0 0 16px; font-size: 16px; line-height: 1.4; }
+dialog form { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
+dialog button { font: inherit; font-size: 16px; min-height: 44px; padding: 8px 16px; border: 2px solid #333; border-radius: 8px; background: #fff; color: #222; cursor: pointer; }
+dialog button[value="confirm"] { background: var(--shell); border-color: var(--shell); color: #fff; font-weight: 700; }
+dialog button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 5px #333; }

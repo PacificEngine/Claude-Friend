@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { MENU, createUi, press, describeAction, shouldResetScreen, selectMenu } from '../src/ui/controller.js';
+import { MENU, createUi, press, startOver, describeAction, shouldResetScreen, selectMenu } from '../src/ui/controller.js';
 import { petAt } from './helpers.js';
 
 const low = () => 0.1; // left
@@ -259,6 +259,19 @@ describe('controller', () => {
       ({ ui } = press(ui, pet, 'A', low));
       expect(ui.notice).toBeNull();
     });
+  });
+});
+
+describe('startOver', () => {
+  it('returns a fresh ui and a new egg', () => {
+    const { ui, pet } = startOver();
+    expect(ui).toEqual(createUi());
+    expect(pet.stage).toBe('egg');
+    expect(pet.ageMinutes).toBe(0);
+  });
+
+  it('returns new objects each call', () => {
+    expect(startOver().pet).not.toBe(startOver().pet);
   });
 });
 

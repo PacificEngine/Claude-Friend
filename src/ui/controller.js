@@ -111,12 +111,15 @@ export function selectMenu(ui, name) {
   return { ...ui, menuIndex, notice: null };
 }
 
+// Pure: a clean slate, used by the New egg button and by B on a dead pet.
+export const startOver = () => ({ ui: createUi(), pet: createPet() });
+
 const HANDLERS = { main, feed, play, guess, highlow, result: backToMain, status: backToMain };
 
 export function press(ui, pet, button, rng) {
   if (pet.stage === 'dead') {
     const restart = ui.screen === 'main' && button === 'B';
-    return { ui: createUi(), pet: restart ? createPet() : pet };
+    return restart ? startOver() : { ui: createUi(), pet };
   }
   return HANDLERS[ui.screen]({ ...ui, notice: null }, pet, button, rng);
 }

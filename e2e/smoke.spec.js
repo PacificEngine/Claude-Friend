@@ -108,3 +108,39 @@ test('Play opens a chooser for two mini-games; C cancels back to main', async ({
 
   expect(errors).toEqual([]);
 });
+
+test('New egg asks first, then starts over; Cancel changes nothing', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+
+  await page.goto('/?speed=60'); // the egg hatches in about 5 s
+  const lcd = page.locator('#lcd');
+  const dialog = page.locator('#new-egg-dialog');
+  await expect(lcd).toHaveAttribute('data-stage', 'baby', { timeout: 15000 });
+
+  await page.click('#new-egg');
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText('Start over with a new egg? Your current pet will be lost.');
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(lcd).toHaveAttribute('data-stage', 'baby');
+
+  await page.click('#new-egg');
+  await page.keyboard.press('Escape');
+  await expect(dialog).not.toBeVisible();
+  await expect(lcd).toHaveAttribute('data-stage', 'baby');
+
+  await page.click('#new-egg');
+  await dialog.getByRole('button', { name: 'Start over' }).click();
+  await expect(lcd).toHaveAttribute('data-stage', 'egg');
+  await expect(page.locator('#notice')).toHaveText('A new egg!');
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('virtual-pet')));
+  expect(saved.state.stage).toBe('egg');
+  expect(saved.state.ageMinutes).toBeLessThan(2);
+
+  // The sound and music toggles are untouched by all of this.
+  await expect(page.locator('#mute')).toHaveText('Sound: on');
+  await expect(page.locator('#music')).toHaveText('Music: on');
+
+  expect(errors).toEqual([]);
+});

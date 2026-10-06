@@ -29,8 +29,16 @@
     <div class="toggles">
       <button id="mute" class="mute" aria-pressed="false">Sound: on</button>
       <button id="music" class="mute" aria-pressed="false">Music: on</button>
+      <button id="new-egg" class="mute" type="button">New egg</button>
     </div>
   </main>
+  <dialog id="new-egg-dialog" aria-labelledby="new-egg-text">
+    <p id="new-egg-text">Start over with a new egg? Your current pet will be lost.</p>
+    <form method="dialog">
+      <button value="cancel" autofocus>Cancel</button>
+      <button value="confirm">Start over</button>
+    </form>
+  </dialog>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>
