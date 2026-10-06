@@ -48,13 +48,13 @@ A **care mistake** is recorded when:
 - a sickness, two or more poop piles, or misbehaving goes unattended for 60 game minutes, or
 - the light is still on at 22:30.
 
-Each episode counts once. Care mistakes and discipline decide which of four characters your pet becomes when it reaches the teen stage and again as an adult:
+Each episode counts once. Which of four characters your pet becomes is decided when it reaches the teen stage and again as an adult, from its care mistakes **per day of life** (total mistakes divided by its age in days, counting any age under one day as one day) and its discipline:
 
 | Character | Needs |
 | --- | --- |
-| Sparky | at most 1 care mistake and discipline of 3 or more |
-| Bubbles | at most 3 care mistakes |
-| Mochi | at most 6 care mistakes |
+| Sparky | at most 1 care mistake per day and discipline of 3 or more |
+| Bubbles | at most 4 care mistakes per day |
+| Mochi | at most 10 care mistakes per day |
 | Grumble | anything worse |
 
 ### Death
@@ -64,6 +64,8 @@ The pet dies if hunger is zero or it is sick for 12 game hours (720 minutes) in 
 ### Sound
 
 The game beeps when the pet calls, when you press a button and when you win or lose the mini-game. Sound starts only after your first click or key press, and the **Sound** button under the controls mutes it.
+
+**Music:** a quiet, original looping tune is synthesized in the browser (no audio files): a gentle square-wave melody over a triangle-wave bass, in C major pentatonic at about 96 BPM. While the pet sleeps it switches to a slower, softer, lower lullaby (about 60 BPM), and it is silent while the pet is an egg or dead. Like the effects, it starts only after your first click or key press, and it pauses while the tab is hidden. The **Music** button toggles it independently of **Sound**. Both choices are saved in your browser (`virtual-pet-prefs` in localStorage); the default is both on.
 
 ## How time works
 
@@ -98,11 +100,15 @@ The first time, install the browser Playwright uses: `yarn playwright install ch
 
 `yarn simulate` is a dev tool, not part of the game. It plays three bot caretakers (attentive, casual, neglectful) through the pure engine for 200 seeded lives each and prints a table: how many reach teen and adult, how they die, lifespan, care mistakes and which characters appear. Use `yarn simulate --runs=N` to change the number of lives per bot. It never changes game numbers; edit `src/engine/constants.js` and re-run it to see the effect of a tweak.
 
+### Balance notes
+
+Besides survival and lifespan, `yarn simulate` prints, per bot, the mean care mistakes by cause (light, ignored call, zero hearts), the mean mistakes and age at the moment the pet becomes a teen and an adult, and the characters reached. The character thresholds are tuned against it. The target outcomes are: the attentive bot becomes Sparky (at least 95% of lives); the casual bot (three short daily check-ins, never touches the light, about 7 mistakes a day) mostly becomes Bubbles or Mochi (at least 70% combined, at most 25% Grumble); and the neglectful bot dies before it gets a character. `tests/simulate.test.js` checks these over a fixed range of seeds.
+
 ## Project layout
 
 - `src/engine/`: pure game rules (no DOM, timers or clock). State, tick, actions, offline catch-up, the mini-game.
 - `src/storage/`: saving and loading the pet in localStorage.
-- `src/ui/`: canvas rendering, sprites, button and menu logic, sound.
+- `src/ui/`: canvas rendering, sprites, button and menu logic, sound, music, saved preferences.
 - `scripts/`: dev tools (the balance simulation).
 - `tests/`: unit tests.
 - `e2e/`: Playwright browser test.

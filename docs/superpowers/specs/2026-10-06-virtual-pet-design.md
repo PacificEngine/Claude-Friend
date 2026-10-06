@@ -21,7 +21,7 @@ Three layers with one-way dependencies: `ui -> engine`, `storage -> engine`. The
 - Sick pets need `medicine` (two doses); untreated illness counts toward neglect.
 - A care mistake is recorded when hunger or happiness sits at zero past a grace period, or a call is ignored.
 - Sleeping pets recover while the light is off; leaving the light on during sleep is a care mistake.
-- Stage transitions by age thresholds; teen and adult characters are chosen from `careMistakes` and `discipline` across 4 characters (best care → worst care).
+- Stage transitions by age thresholds; teen and adult characters are chosen from `careMistakes` per day of life (floored at one day) and `discipline` across 4 characters (best care → worst care): Sparky at ≤1 mistake/day with discipline ≥3, Bubbles ≤4, Mochi ≤10, otherwise Grumble.
 - Death occurs after sustained neglect (hunger zero and/or sickness untreated) or old age.
 
 ### Mini-game (`src/engine/guess.js`)

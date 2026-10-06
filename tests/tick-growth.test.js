@@ -28,7 +28,7 @@ describe('tick: growth', () => {
   });
 
   it('picks the adult character from care history', () => {
-    const adult = tick(petAt('teen', { ageMinutes: 4319, careMistakes: 9 }), never);
+    const adult = tick(petAt('teen', { ageMinutes: 4319, careMistakes: 40 }), never);
     expect(adult).toMatchObject({ stage: 'adult', character: 'grumble' });
   });
 });

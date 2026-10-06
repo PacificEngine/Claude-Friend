@@ -44,3 +44,37 @@ test('menu icons are buttons that select but do not run', async ({ page }) => {
   await page.click('[data-button="C"]');
   await expect(lcd).toHaveAttribute('data-screen', 'main');
 });
+
+test('music toggle works independently of sound and persists across a reload', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+
+  await page.goto('/?speed=600');
+  const music = page.locator('#music');
+  const sound = page.locator('#mute');
+
+  await expect(music).toHaveText('Music: on');
+  await expect(music).toHaveAttribute('aria-pressed', 'false');
+
+  await music.click();
+  await expect(music).toHaveText('Music: off');
+  await expect(music).toHaveAttribute('aria-pressed', 'true');
+  await expect(sound).toHaveText('Sound: on');
+
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('virtual-pet-prefs')));
+  expect(stored).toEqual({ sound: true, music: false });
+
+  await page.reload();
+  await expect(music).toHaveText('Music: off');
+  await expect(music).toHaveAttribute('aria-pressed', 'true');
+  await expect(sound).toHaveText('Sound: on');
+
+  await sound.click();
+  await music.click();
+  await page.reload();
+  await expect(sound).toHaveText('Sound: off');
+  await expect(music).toHaveText('Music: on');
+  await expect(music).toHaveAttribute('aria-pressed', 'false');
+
+  expect(errors).toEqual([]);
+});
