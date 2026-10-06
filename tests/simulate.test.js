@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { runLife, POLICIES, ACTION_NAMES } from '../scripts/simulate.js';
+import { runLife, POLICIES, ACTION_NAMES, classifyMistakes, summarise } from '../scripts/simulate.js';
 import { createPet } from '../src/engine/pet.js';
 
 const seeds = Array.from({ length: 20 }, (_, i) => i + 1);
@@ -40,5 +40,31 @@ describe('simulation', () => {
         for (const a of policy(p)) expect(ACTION_NAMES).toContain(a);
       }
     }
+  });
+
+  it('classifies a care mistake by the state that triggered it', () => {
+    expect(classifyMistakes({ clock: 1350, ignoredMinutes: 3, lowMinutes: 0 }, 1)).toEqual(['light']);
+    expect(classifyMistakes({ clock: 600, ignoredMinutes: 60, lowMinutes: 0 }, 1)).toEqual(['ignored call']);
+    expect(classifyMistakes({ clock: 600, ignoredMinutes: 0, lowMinutes: 60 }, 1)).toEqual(['zero hearts']);
+    expect(classifyMistakes({ clock: 600, ignoredMinutes: 0, lowMinutes: 0 }, 1)).toEqual(['other']);
+    expect(classifyMistakes({ clock: 600, ignoredMinutes: 60, lowMinutes: 60 }, 2))
+      .toEqual(['ignored call', 'zero hearts']);
+  });
+
+  it('records mistakes by cause and at the teen and adult moments', () => {
+    const life = runLife(POLICIES.casual, 3);
+    const total = Object.values(life.causes).reduce((a, b) => a + b, 0);
+    expect(total).toBe(life.careMistakes);
+    expect(life.atTeen.ageDays).toBe(1);
+    expect(life.atAdult.ageDays).toBe(3);
+    expect(life.atAdult.careMistakes).toBeGreaterThanOrEqual(life.atTeen.careMistakes);
+    expect(runLife(POLICIES.neglectful, 3).atTeen).toBeNull();
+  });
+
+  it('prints the new per-bot lines', () => {
+    const text = summarise('casual', [runLife(POLICIES.casual, 3), runLife(POLICIES.neglectful, 3)]);
+    expect(text).toMatch(/mistakes by cause:\s+light=.*ignored call=.*zero hearts=.*other=/);
+    expect(text).toMatch(/mistakes at teen:\s+mean .*age .* days/);
+    expect(text).toMatch(/mistakes at adult:\s+mean .*age .* days/);
   });
 });
