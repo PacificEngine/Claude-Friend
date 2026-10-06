@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { save, load } from '../src/storage/storage.js';
+import { save, load, loadPet } from '../src/storage/storage.js';
 import { createPet } from '../src/engine/pet.js';
 import { MAX_OFFLINE_MINUTES } from '../src/engine/constants.js';
 import { never, petAt } from './helpers.js';
@@ -76,5 +76,42 @@ describe('storage migration', () => {
     const loaded = load(5 * MIN, never, storage);
     expect(loaded.ignoredMinutes).toBe(5);
     expect(Number.isNaN(loaded.careMistakes)).toBe(false);
+  });
+});
+
+describe('loadPet tick baseline', () => {
+  it('keeps the unreplayed fraction of a minute owed: 90 s away replays 1 minute', () => {
+    const storage = fakeStorage();
+    save(petAt('baby'), 1000, storage);
+    const { pet, lastTick } = loadPet(1000 + 90000, never, storage, MIN);
+    expect(pet.ageMinutes).toBe(5 + 1);
+    expect(lastTick).toBe(1000 + MIN);
+  });
+
+  it('starts the clock now on a fresh start', () => {
+    expect(loadPet(5000, never, fakeStorage()).lastTick).toBe(5000);
+  });
+
+  it('starts the clock now on corrupt data', () => {
+    expect(loadPet(5000, never, fakeStorage({ 'virtual-pet': '{nope' })).lastTick).toBe(5000);
+  });
+
+  it('starts the clock now after an absence beyond the offline cap', () => {
+    const storage = fakeStorage();
+    save(petAt('baby'), 0, storage);
+    const now = (MAX_OFFLINE_MINUTES + 10) * MIN + 30000;
+    expect(loadPet(now, never, storage, MIN).lastTick).toBe(now);
+  });
+
+  it('starts the clock now if the clock went backwards', () => {
+    const storage = fakeStorage();
+    save(petAt('baby'), 5 * MIN, storage);
+    expect(loadPet(0, never, storage, MIN).lastTick).toBe(0);
+  });
+
+  it('load still returns just the pet', () => {
+    const storage = fakeStorage();
+    save(petAt('baby'), 0, storage);
+    expect(load(MIN, never, storage).ageMinutes).toBe(6);
   });
 });

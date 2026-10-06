@@ -2,7 +2,7 @@ import { mulberry32 } from './engine/rng.js';
 import { tick } from './engine/tick.js';
 import { advance } from './engine/advance.js';
 import { MAX_OFFLINE_MINUTES, SUSPENDED_AFTER_MINUTES, DEFAULT_SPEED } from './engine/constants.js';
-import { load, save } from './storage/storage.js';
+import { loadPet, save } from './storage/storage.js';
 import { render } from './ui/render.js';
 import { createUi, press, MENU, shouldResetScreen, selectMenu } from './ui/controller.js';
 import { createSound } from './ui/sound.js';
@@ -16,9 +16,8 @@ const sound = createSound();
 const canvas = document.getElementById('lcd');
 const ctx = canvas.getContext('2d');
 
-let pet = load(Date.now(), rng, localStorage, MS_PER_MINUTE);
+let { pet, lastTick } = loadPet(Date.now(), rng, localStorage, MS_PER_MINUTE);
 let ui = createUi();
-let lastTick = Date.now();
 const noticeEl = document.getElementById('notice');
 let noticeTimer;
 
