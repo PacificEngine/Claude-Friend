@@ -65,6 +65,8 @@ The pet dies if hunger is zero or it is sick for 12 game hours (720 minutes) in 
 
 The game beeps when the pet calls, when you press a button and when you win or lose the mini-game. Sound starts only after your first click or key press, and the **Sound** button under the controls mutes it.
 
+**Music:** a quiet, original looping tune is synthesized in the browser (no audio files): a gentle square-wave melody over a triangle-wave bass, in C major pentatonic at about 96 BPM. While the pet sleeps it switches to a slower, softer, lower lullaby (about 60 BPM), and it is silent while the pet is an egg or dead. Like the effects, it starts only after your first click or key press, and it pauses while the tab is hidden. The **Music** button toggles it independently of **Sound**. Both choices are saved in your browser (`virtual-pet-prefs` in localStorage); the default is both on.
+
 ## How time works
 
 The game runs in real time by default: one game minute passes per real minute, so a game day is a real day. The egg hatches after about 5 minutes, a baby loses a heart roughly every 30 minutes, and the pet grows to a child after 6 hours, a teen after 1 day and an adult after 3 days. Add `?speed=N` to the URL to multiply the rate: `?speed=60` is a fast mode (one game minute per real second), `?speed=600` is very fast.
@@ -106,7 +108,7 @@ Besides survival and lifespan, `yarn simulate` prints, per bot, the mean care mi
 
 - `src/engine/`: pure game rules (no DOM, timers or clock). State, tick, actions, offline catch-up, the mini-game.
 - `src/storage/`: saving and loading the pet in localStorage.
-- `src/ui/`: canvas rendering, sprites, button and menu logic, sound.
+- `src/ui/`: canvas rendering, sprites, button and menu logic, sound, music, saved preferences.
 - `scripts/`: dev tools (the balance simulation).
 - `tests/`: unit tests.
 - `e2e/`: Playwright browser test.
