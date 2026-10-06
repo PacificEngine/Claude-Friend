@@ -96,5 +96,11 @@ mute.addEventListener('click', () => {
   mute.setAttribute('aria-pressed', String(muted));
 });
 
+// Browsers may freeze or discard a hidden tab without another tick, so save when leaving.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') persist();
+});
+window.addEventListener('pagehide', persist);
+
 draw();
 setInterval(step, 250);
