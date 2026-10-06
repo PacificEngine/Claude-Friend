@@ -1,6 +1,6 @@
 # Clade Pets
 
-A browser Tamagotchi-style virtual pet. An egg hatches, grows through baby, child, teen and adult stages, and needs feeding, play, cleaning, medicine, sleep and discipline. Neglect it and it dies. It is vanilla JavaScript (ES modules) with no framework and no build step.
+A browser Tamagotchi-style virtual pet. An egg hatches, grows through baby, child, teen and adult stages (each adult has its own art), and needs feeding, play, cleaning, medicine, sleep and discipline. Neglect it and it dies. It is vanilla JavaScript (ES modules) with no framework and no build step.
 
 **Play it:** https://pacificengine.github.io/Claude-Friend/
 
@@ -20,13 +20,22 @@ You can also click, tap or Tab to a menu icon and press Enter or Space. That onl
 | --- | --- |
 | 🍙 Feed | Choose a meal or a snack. |
 | 💡 Light | Turn the light on or off (only matters at night). |
-| 🎮 Play | Left-or-right guessing mini-game: three rounds, win two or more to raise happiness. |
+| 🎮 Play | Choose a mini-game (see below). Win two of three rounds to raise happiness. |
 | 💉 Medicine | Treat a sick pet. It needs two doses. |
 | 🚽 Clean | Clean up poop. |
 | 📊 Status | Show hearts for hunger (F), happiness (H) and discipline (D). |
 | 📣 Discipline | Scold a pet that is misbehaving. |
 
 Every action shows a short message under the screen (for example "Yum!", "Not hungry", "Nothing to clean", "Still an egg…"), so you can tell when a button did nothing and why. While it is still an egg, nothing can be done except wait for it to hatch.
+
+### Mini-games
+
+Press **B** on the Play icon, then **A** to switch between the two games and **B** to start. **C** goes back.
+
+- **Left or Right:** each round, pick a side with **A** and press **B**; you win the round if you picked the direction the game chose.
+- **Higher or Lower:** a number from 1 to 9 is shown. Pick Higher or Lower with **A** and press **B**; you win the round if the next number goes that way. A tie loses. The new number is the one to beat next round.
+
+Both games have three rounds; win two or more to make the pet happier. An egg, a sleeping pet or a sick pet will not play.
 
 ### Calls and warnings
 
@@ -59,13 +68,13 @@ Each episode counts once. Which of four characters your pet becomes is decided w
 
 ### Death
 
-The pet dies if hunger is zero or it is sick for 12 game hours (720 minutes) in a row while awake, or of old age: an adult dies at 10 game days old. Press **B** to start over with a new egg.
+The pet dies if hunger is zero or it is sick for 12 game hours (720 minutes) in a row while awake, or of old age: an adult dies at 10 game days old. Press **B** to start over with a new egg. You can also press the **New egg** button under the controls at any time; it asks you to confirm first, because your current pet is lost.
 
 ### Sound
 
-The game beeps when the pet calls, when you press a button and when you win or lose the mini-game. Sound starts only after your first click or key press, and the **Sound** button under the controls mutes it.
+The game beeps when the pet calls, when you press a button and when you win or lose a mini-game. Sound starts only after your first click or key press, and the **Sound** button under the controls mutes it.
 
-**Music:** a quiet, original looping tune is synthesized in the browser (no audio files): a gentle square-wave melody over a triangle-wave bass, in C major pentatonic at about 96 BPM. While the pet sleeps it switches to a slower, softer, lower lullaby (about 60 BPM), and it is silent while the pet is an egg or dead. Like the effects, it starts only after your first click or key press, and it pauses while the tab is hidden. The **Music** button toggles it independently of **Sound**. Both choices are saved in your browser (`virtual-pet-prefs` in localStorage); the default is both on.
+**Music:** a quiet, original looping tune is synthesized in the browser (no audio files): a gentle square-wave melody over a triangle-wave bass, in C major pentatonic at about 96 BPM. While the pet sleeps it switches to a slower, softer, lower lullaby (about 60 BPM), and it is silent while the pet is an egg or dead. Like the effects, it starts only after your first click or key press, and it pauses while the tab is hidden. The **Music** button toggles it independently of **Sound**. (The **New egg** button sits beside them; it does not affect either.) Both choices are saved in your browser (`virtual-pet-prefs` in localStorage); the default is both on.
 
 ## How time works
 
@@ -106,12 +115,12 @@ Besides survival and lifespan, `yarn simulate` prints, per bot, the mean care mi
 
 ## Project layout
 
-- `src/engine/`: pure game rules (no DOM, timers or clock). State, tick, actions, offline catch-up, the mini-game.
+- `src/engine/`: pure game rules (no DOM, timers or clock). State, tick, actions, offline catch-up, the mini-games.
 - `src/storage/`: saving and loading the pet in localStorage.
-- `src/ui/`: canvas rendering, sprites, button and menu logic, sound, music, saved preferences.
+- `src/ui/`: canvas rendering, sprites and digits, button and menu logic, screen-reader descriptions, sound, music, saved preferences.
 - `scripts/`: dev tools (the balance simulation).
 - `tests/`: unit tests.
-- `e2e/`: Playwright browser test.
+- `e2e/`: Playwright browser tests.
 - `docs/superpowers/`: design specs and implementation plans.
 
 ## Deployment

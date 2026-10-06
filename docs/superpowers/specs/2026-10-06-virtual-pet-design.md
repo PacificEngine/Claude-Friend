@@ -24,17 +24,20 @@ Three layers with one-way dependencies: `ui -> engine`, `storage -> engine`. The
 - Stage transitions by age thresholds; teen and adult characters are chosen from `careMistakes` per day of life (floored at one day) and `discipline` across 4 characters (best care → worst care): Sparky at ≤1 mistake/day with discipline ≥3, Bubbles ≤4, Mochi ≤10, otherwise Grumble.
 - Death occurs after sustained neglect (hunger zero and/or sickness untreated) or old age.
 
-### Mini-game (`src/engine/guess.js`)
-"Left or right": the player guesses a direction. `playGuess(choice, rng)` returns `{ won, direction }`. Three rounds; two or more wins raises happiness. Pure and tested.
+### Mini-games (`src/engine/guess.js`, `src/engine/highlow.js`)
+The Play icon opens a chooser with two games. Both run `ROUNDS` (three) rounds, and two or more wins raise happiness (`scoreGame` and `applyGameResult` in `guess.js` work on any round with a `.won`). Both are pure, take an injected `rng`, and are tested.
+- "Left or right": `playGuess(choice, rng)` returns `{ choice, direction, won }`.
+- "Higher or lower": a number from 1 to 9 is shown (`drawNumber(rng)`); the player guesses whether the next one is higher or lower. `playHighLow(shown, choice, rng)` returns `{ shown, next, choice, won }`. A tie is a loss. The new number becomes the next round's shown number.
 
 ### Storage (`src/storage/`)
 `save(state, nowMs)` and `load(nowMs)` over localStorage. On load, elapsed real minutes since the last save are replayed through `advance`, capped (for example 3 days) so a long absence results in a fair outcome. Corrupt or missing data starts a fresh egg.
 
 ### UI (`src/ui/`, `index.html`, `styles.css`)
-- Plastic egg-shaped shell in CSS with a 32×16 LCD `<canvas>` scaled by integer factors, and three buttons A/B/C.
-- `sprites.js`: 1-bit bitmaps as string arrays for each stage/character/animation frame, plus the attention icon. Teen and adult share one sprite per character. The icon row (feed, light, play, medicine, clean, status, discipline) is HTML in the shell, not canvas.
-- `render.js`: draws a state to the canvas (no logic).
-- `controller.js`: maps buttons to menu navigation and engine actions. A cycles the icon, B selects, C cancels. Runs a 1-second interval that ticks the engine on a game-minute schedule and saves. A `?speed=N` query param multiplies game speed: the default is 1 (real time: one game minute per real minute); `?speed=60` is a fast mode (one game minute per real second).
+- Plastic egg-shaped shell in CSS with a 32×32 LCD `<canvas>` scaled by CSS, and three buttons A/B/C, with Sound, Music and New egg buttons beneath. New egg opens a native `<dialog>` that asks for confirmation before replacing the pet with a new egg.
+- `sprites.js`: 16×16 1-bit bitmaps as string arrays for each stage and character, plus small icons (hearts, arrows, the attention mark) and 3×5 digits. Each adult has its own bolder sprite (`<character>Adult`) with a signature mark; teens use the plain character sprite. The icon row (feed, light, play, medicine, clean, status, discipline) is HTML in the shell, not canvas.
+- `render.js`: draws a state to the canvas (no logic), including the Play chooser and the Higher or Lower screen (the number drawn at 3× scale).
+- `describe.js`: a screen-reader sentence for the canvas, including the open screen.
+- `controller.js`: maps buttons to menu navigation and engine actions. A cycles the icon, B selects, C cancels. `main.js` owns the clock: a 250 ms interval ticks the engine on a game-minute schedule and saves. A `?speed=N` query param multiplies game speed: the default is 1 (real time: one game minute per real minute); `?speed=60` is a fast mode (one game minute per real second).
 - `sound.js`: Web Audio synthesized beeps (attention call, button, win/lose). Muted until the first user interaction, and has a mute toggle.
 
 ## Testing
@@ -43,7 +46,7 @@ Three layers with one-way dependencies: `ui -> engine`, `storage -> engine`. The
 - Security: run Snyk code scan on first-party code before finishing.
 
 ## Out of scope (YAGNI)
-Multiplayer or "connection" features, accounts, backend, multiple save slots, additional mini-games beyond the guess game.
+Multiplayer or "connection" features, accounts, backend, multiple save slots, further mini-games beyond Left or Right and Higher or Lower.
 
 ## Workflow
 Branch `feature/virtual-pet`, a commit per red-green-refactor cycle, squashed into a single meaningful commit before finishing. Package manager: `yarn`.
