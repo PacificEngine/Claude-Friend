@@ -7,8 +7,9 @@ import { render } from './ui/render.js';
 import { createUi, press, MENU } from './ui/controller.js';
 import { createSound } from './ui/sound.js';
 
-const speed = Number(new URLSearchParams(location.search).get('speed')) || 1;
+const speed = Number(new URLSearchParams(location.search).get('speed')) || 60; // ?speed=1 is real time
 const MS_PER_MINUTE = 60000 / speed;
+const NOTICE_MS = 2500;
 const SUSPENDED_AFTER = 60; // game minutes
 
 const rng = mulberry32(Date.now());
@@ -16,9 +17,11 @@ const sound = createSound();
 const canvas = document.getElementById('lcd');
 const ctx = canvas.getContext('2d');
 
-let pet = load(Date.now(), rng);
+let pet = load(Date.now(), rng, localStorage, MS_PER_MINUTE);
 let ui = createUi();
 let lastTick = Date.now();
+const noticeEl = document.getElementById('notice');
+let noticeTimer;
 
 // A storage failure (quota, private mode) must never break the game loop.
 function persist() {
@@ -54,9 +57,16 @@ function step() {
   draw();
 }
 
+function showNotice(text) {
+  clearTimeout(noticeTimer);
+  noticeEl.textContent = text ?? '';
+  if (text) noticeTimer = setTimeout(() => { noticeEl.textContent = ''; }, NOTICE_MS);
+}
+
 function onButton(button) {
   const previous = ui.screen;
   ({ ui, pet } = press(ui, pet, button, rng));
+  showNotice(ui.notice);
   sound.beep('button');
   if (ui.screen === 'result' && previous !== 'result') sound.beep(ui.result.won ? 'win' : 'lose');
   persist();
