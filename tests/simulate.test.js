@@ -67,4 +67,26 @@ describe('simulation', () => {
     expect(text).toMatch(/mistakes at teen:\s+mean .*age .* days/);
     expect(text).toMatch(/mistakes at adult:\s+mean .*age .* days/);
   });
+
+  describe('balance targets (30 fixed seeds, deterministic bots)', () => {
+    const lives = (policy) => Array.from({ length: 30 }, (_, i) => runLife(POLICIES[policy], i + 1));
+    const share = (xs, pred) => xs.filter(pred).length / xs.length;
+
+    it('attentive caretakers get sparky at least 95% of the time', () => {
+      expect(share(lives('attentive'), (l) => l.character === 'sparky')).toBeGreaterThanOrEqual(0.95);
+    });
+
+    it('casual caretakers mostly get bubbles or mochi, and grumble at most 25%', () => {
+      const casual = lives('casual');
+      expect(share(casual, (l) => l.character === 'bubbles' || l.character === 'mochi')).toBeGreaterThanOrEqual(0.7);
+      expect(share(casual, (l) => l.character === 'grumble')).toBeLessThanOrEqual(0.25);
+    });
+
+    it('neglectful caretakers die before getting a character', () => {
+      for (const l of lives('neglectful')) {
+        expect(l.dead).toBe(true);
+        expect(l.character).toBeNull();
+      }
+    });
+  });
 });
