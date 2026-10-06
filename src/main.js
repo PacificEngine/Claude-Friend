@@ -7,6 +7,9 @@ import { render } from './ui/render.js';
 import { createUi, press, MENU, shouldResetScreen, selectMenu } from './ui/controller.js';
 import { describePet } from './ui/describe.js';
 import { createSound } from './ui/sound.js';
+import { createMusic } from './ui/music.js';
+import { moodFor } from './ui/music-score.js';
+import { loadPrefs, savePrefs } from './ui/prefs.js';
 
 const speed = Number(new URLSearchParams(location.search).get('speed')) || DEFAULT_SPEED; // ?speed=60 is the fast mode
 const MS_PER_MINUTE = 60000 / speed;
@@ -14,6 +17,10 @@ const NOTICE_MS = 2500;
 
 const rng = mulberry32(Date.now());
 const sound = createSound();
+const music = createMusic();
+const prefs = loadPrefs();
+sound.setMuted(!prefs.sound);
+music.setEnabled(prefs.music);
 const canvas = document.getElementById('lcd');
 const ctx = canvas.getContext('2d');
 
@@ -32,6 +39,7 @@ function persist() {
 }
 
 let lastLabel = '';
+let lastMood = '';
 
 function draw() {
   render(ctx, pet, ui, Math.floor(Date.now() / 500));
@@ -45,6 +53,11 @@ function draw() {
   if (label !== lastLabel) {
     canvas.setAttribute('aria-label', label);
     lastLabel = label;
+  }
+  const mood = moodFor(pet);
+  if (mood !== lastMood) {
+    lastMood = mood;
+    music.setMood(mood);
   }
   Object.assign(canvas.dataset, { screen: ui.screen, stage: pet.stage, hunger: pet.hunger, happiness: pet.happiness });
 }
@@ -97,12 +110,25 @@ document.addEventListener('keydown', (e) => {
   const key = e.key.toUpperCase();
   if (['A', 'B', 'C'].includes(key)) onButton(key);
 });
-const mute = document.getElementById('mute');
-mute.addEventListener('click', () => {
-  const muted = sound.toggleMute();
-  mute.textContent = `Sound: ${muted ? 'off' : 'on'}`;
-  mute.setAttribute('aria-pressed', String(muted));
-});
+// Browsers only allow audio after a user gesture; the first one starts the music.
+['click', 'keydown'].forEach((type) => document.addEventListener(type, () => music.start()));
+
+function bindToggle(id, label, key, apply) {
+  const el = document.getElementById(id);
+  const show = () => {
+    el.textContent = `${label}: ${prefs[key] ? 'on' : 'off'}`;
+    el.setAttribute('aria-pressed', String(!prefs[key]));
+  };
+  show();
+  el.addEventListener('click', () => {
+    prefs[key] = !prefs[key];
+    apply(prefs[key]);
+    savePrefs(prefs);
+    show();
+  });
+}
+bindToggle('mute', 'Sound', 'sound', (on) => sound.setMuted(!on));
+bindToggle('music', 'Music', 'music', (on) => music.setEnabled(on));
 
 // Browsers may freeze or discard a hidden tab without another tick, so save when leaving.
 document.addEventListener('visibilitychange', () => {

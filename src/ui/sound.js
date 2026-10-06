@@ -27,5 +27,9 @@ export function createSound() {
     }
   }
 
-  return { beep, toggleMute: () => (muted = !muted) };
+  return {
+    beep,
+    setMuted: (value) => { muted = value; },
+    isMuted: () => muted,
+  };
 }
