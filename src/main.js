@@ -1,13 +1,13 @@
 import { mulberry32 } from './engine/rng.js';
 import { tick } from './engine/tick.js';
 import { advance } from './engine/advance.js';
-import { MAX_OFFLINE_MINUTES, SUSPENDED_AFTER_MINUTES } from './engine/constants.js';
+import { MAX_OFFLINE_MINUTES, SUSPENDED_AFTER_MINUTES, DEFAULT_SPEED } from './engine/constants.js';
 import { load, save } from './storage/storage.js';
 import { render } from './ui/render.js';
 import { createUi, press, MENU, shouldResetScreen, selectMenu } from './ui/controller.js';
 import { createSound } from './ui/sound.js';
 
-const speed = Number(new URLSearchParams(location.search).get('speed')) || 60; // ?speed=1 is real time
+const speed = Number(new URLSearchParams(location.search).get('speed')) || DEFAULT_SPEED; // ?speed=60 is the fast mode
 const MS_PER_MINUTE = 60000 / speed;
 const NOTICE_MS = 2500;
 

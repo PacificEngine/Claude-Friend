@@ -43,9 +43,9 @@ Sustained neglect or old age ends the pet's life. Press **B** to start over with
 
 ## How time works
 
-By default one game minute passes in about one real second. Add `?speed=N` to the URL to change the rate: `?speed=1` is real time (one game minute per real minute), `?speed=600` is very fast.
+The game runs in real time by default: one game minute passes per real minute, so a game day is a real day. The egg hatches after about 5 minutes, a baby loses a heart roughly every 30 minutes, and the pet grows to a child after 6 hours, a teen after 1 day and an adult after 3 days. Add `?speed=N` to the URL to multiply the rate: `?speed=60` is a fast mode (one game minute per real second), `?speed=600` is very fast.
 
-Progress is saved in your browser (localStorage) and catches up while the tab is closed, capped at 3 game days so a long absence is not instantly fatal.
+Progress is saved in your browser (localStorage) and catches up while the tab is closed or hidden, capped at 3 real days (at the default speed) so a long absence is not instantly fatal.
 
 ## Run locally
 

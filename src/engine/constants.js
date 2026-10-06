@@ -23,3 +23,4 @@ export const SPARKY_MIN_DISCIPLINE = 3;
 export const BUBBLES_MAX_MISTAKES = 3;
 export const MOCHI_MAX_MISTAKES = 6;
 export const SUSPENDED_AFTER_MINUTES = 60;
+export const DEFAULT_SPEED = 1; // real time: one game minute per real minute
