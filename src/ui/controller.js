@@ -80,6 +80,13 @@ export function shouldResetScreen(pet, ui) {
   return pet.sick && ui.screen === 'guess';
 }
 
+// Pure: pointing at an icon only moves the selection; B still runs it.
+export function selectMenu(ui, name) {
+  const menuIndex = MENU.indexOf(name);
+  if (ui.screen !== 'main' || menuIndex < 0) return ui;
+  return { ...ui, menuIndex, notice: null };
+}
+
 const HANDLERS = { main, feed, guess, result: backToMain, status: backToMain };
 
 export function press(ui, pet, button, rng) {

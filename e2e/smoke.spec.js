@@ -27,3 +27,19 @@ test('egg hatches, can be fed, and survives a reload', async ({ page }) => {
 
   expect(errors).toEqual([]);
 });
+
+test('menu icons are buttons that select but do not run', async ({ page }) => {
+  await page.goto('/?speed=60');
+  const lcd = page.locator('#lcd');
+  const status = page.locator('button[data-menu="status"]');
+
+  await status.click();
+  await expect(lcd).toHaveAttribute('data-screen', 'main');
+  await expect(status).toHaveAttribute('aria-current', 'true');
+
+  await page.click('[data-button="B"]');
+  await expect(lcd).toHaveAttribute('data-screen', 'status');
+
+  await page.click('[data-button="C"]');
+  await expect(lcd).toHaveAttribute('data-screen', 'main');
+});

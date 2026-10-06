@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { MENU, createUi, press, describeAction, shouldResetScreen } from '../src/ui/controller.js';
+import { MENU, createUi, press, describeAction, shouldResetScreen, selectMenu } from '../src/ui/controller.js';
 import { petAt } from './helpers.js';
 
 const low = () => 0.1; // left
@@ -201,5 +201,25 @@ describe('describeAction', () => {
 
   it('has nothing to say about other actions', () => {
     expect(d('play', child)).toBeNull();
+  });
+
+  describe('selectMenu', () => {
+    it('moves the selection to the named icon and clears the notice', () => {
+      const ui = { ...createUi(), notice: 'Yum!' };
+      const next = selectMenu(ui, 'status');
+      expect(next.menuIndex).toBe(MENU.indexOf('status'));
+      expect(next.notice).toBeNull();
+      expect(next.screen).toBe('main');
+    });
+
+    it('does nothing outside the main screen', () => {
+      const ui = { ...createUi(), screen: 'feed' };
+      expect(selectMenu(ui, 'status')).toBe(ui);
+    });
+
+    it('ignores unknown names', () => {
+      const ui = createUi();
+      expect(selectMenu(ui, 'nope')).toBe(ui);
+    });
   });
 });

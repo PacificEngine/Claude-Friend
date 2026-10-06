@@ -4,7 +4,7 @@ import { advance } from './engine/advance.js';
 import { MAX_OFFLINE_MINUTES, SUSPENDED_AFTER_MINUTES } from './engine/constants.js';
 import { load, save } from './storage/storage.js';
 import { render } from './ui/render.js';
-import { createUi, press, MENU, shouldResetScreen } from './ui/controller.js';
+import { createUi, press, MENU, shouldResetScreen, selectMenu } from './ui/controller.js';
 import { createSound } from './ui/sound.js';
 
 const speed = Number(new URLSearchParams(location.search).get('speed')) || 60; // ?speed=1 is real time
@@ -34,9 +34,12 @@ function persist() {
 function draw() {
   render(ctx, pet, ui, Math.floor(Date.now() / 500));
   document.querySelectorAll('[data-menu]').forEach((el) => {
-    el.classList.toggle('active', ui.screen === 'main' && MENU[ui.menuIndex] === el.dataset.menu);
+    const active = ui.screen === 'main' && MENU[ui.menuIndex] === el.dataset.menu;
+    el.classList.toggle('active', active);
+    if (active) el.setAttribute('aria-current', 'true');
+    else el.removeAttribute('aria-current');
   });
-  Object.assign(canvas.dataset, { stage: pet.stage, hunger: pet.hunger, happiness: pet.happiness });
+  Object.assign(canvas.dataset, { screen: ui.screen, stage: pet.stage, hunger: pet.hunger, happiness: pet.happiness });
 }
 
 function step() {
@@ -74,6 +77,14 @@ function onButton(button) {
 
 document.querySelectorAll('[data-button]').forEach((el) => {
   el.addEventListener('click', () => onButton(el.dataset.button));
+});
+document.querySelectorAll('[data-menu]').forEach((el) => {
+  el.addEventListener('click', () => {
+    ui = selectMenu(ui, el.dataset.menu);
+    showNotice(ui.notice);
+    persist();
+    draw();
+  });
 });
 document.addEventListener('keydown', (e) => {
   const key = e.key.toUpperCase();
