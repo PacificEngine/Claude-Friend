@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { save, load, loadPet } from '../src/storage/storage.js';
-import { createPet } from '../src/engine/pet.js';
+import { createPet, withAttention } from '../src/engine/pet.js';
 import { MAX_OFFLINE_MINUTES } from '../src/engine/constants.js';
 import { never, petAt } from './helpers.js';
 
@@ -113,5 +113,72 @@ describe('loadPet tick baseline', () => {
     const storage = fakeStorage();
     save(petAt('baby'), 0, storage);
     expect(load(MIN, never, storage).ageMinutes).toBe(6);
+  });
+});
+
+describe('save hardening', () => {
+  const loadSaved = (state, savedAt = 0, now = 0) =>
+    load(now, never, fakeStorage({ 'virtual-pet': JSON.stringify({ state, savedAt }) }));
+  const fresh = createPet();
+
+  it('round-trips a valid save with every field', () => {
+    const pet = withAttention(petAt('teen', { character: 'mochi', hunger: 2, poop: 3, sick: true, doses: 1, clock: 100 }));
+    expect(loadSaved(pet)).toEqual(pet);
+  });
+
+  it('loads an old save missing ignoredMinutes', () => {
+    const { ignoredMinutes, ...old } = petAt('child');
+    expect(loadSaved(old).stage).toBe('child');
+  });
+
+  const invalid = [
+    ['stage', 'wizard'], ['stage', 1],
+    ['character', 'dragon'], ['character', 5],
+    ['ageMinutes', -1], ['ageMinutes', 'x'], ['ageMinutes', null],
+    ['careMistakes', -1], ['lowMinutes', -3], ['neglectMinutes', 'a'], ['ignoredMinutes', -1],
+    ['hunger', 5], ['hunger', -1], ['hunger', 1.5], ['hunger', '2'],
+    ['happiness', 5], ['happiness', 0.5],
+    ['discipline', 9], ['discipline', -1],
+    ['weight', 0], ['weight', 'heavy'],
+    ['poop', 5], ['poop', 1.5],
+    ['doses', 3], ['doses', -1],
+    ['clock', 1440], ['clock', -1], ['clock', 1.5],
+    ['sick', 1], ['asleep', 'yes'], ['lightOn', null], ['misbehaving', 0],
+  ];
+  it.each(invalid)('treats %s = %j as invalid and starts a fresh egg', (key, value) => {
+    expect(loadSaved({ ...petAt('child'), [key]: value })).toEqual(fresh);
+  });
+
+  it.each([NaN, Infinity])('rejects non-finite number %s via JSON null', (n) => {
+    // JSON.stringify turns NaN/Infinity into null, which is not a finite number.
+    expect(loadSaved({ ...petAt('child'), hunger: n })).toEqual(fresh);
+  });
+
+  it('drops unknown keys', () => {
+    const loaded = loadSaved({ ...petAt('child'), evil: 1 });
+    expect(loaded).not.toHaveProperty('evil');
+  });
+
+  it('does not let __proto__ pollute the pet or Object.prototype', () => {
+    const raw = '{"state":' + JSON.stringify(petAt('child')).replace('{', '{"__proto__":{"polluted":true},') + ',"savedAt":0}';
+    const loaded = load(0, never, fakeStorage({ 'virtual-pet': raw }));
+    expect(loaded.stage).toBe('child');
+    expect(loaded.polluted).toBeUndefined();
+    expect({}.polluted).toBeUndefined();
+  });
+
+  it('starts fresh when savedAt is not finite', () => {
+    const storage = fakeStorage({ 'virtual-pet': JSON.stringify({ state: petAt('child'), savedAt: null }) });
+    expect(load(0, never, storage)).toEqual(fresh);
+  });
+
+  it('starts fresh when state is an array or missing', () => {
+    expect(loadSaved([])).toEqual(fresh);
+    expect(loadSaved(null)).toEqual(fresh);
+  });
+
+  it('recomputes needsAttention instead of trusting it', () => {
+    const loaded = loadSaved({ ...petAt('child'), sick: true, needsAttention: false });
+    expect(loaded.needsAttention).toBe(true);
   });
 });

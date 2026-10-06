@@ -94,11 +94,16 @@ yarn test:e2e    # browser test (Playwright); starts the server itself
 
 The first time, install the browser Playwright uses: `yarn playwright install chromium`. This project has no CI, so run both commands locally before opening a pull request.
 
+## Balance simulation
+
+`yarn simulate` is a dev tool, not part of the game. It plays three bot caretakers (attentive, casual, neglectful) through the pure engine for 200 seeded lives each and prints a table: how many reach teen and adult, how they die, lifespan, care mistakes and which characters appear. Use `yarn simulate --runs=N` to change the number of lives per bot. It never changes game numbers; edit `src/engine/constants.js` and re-run it to see the effect of a tweak.
+
 ## Project layout
 
 - `src/engine/`: pure game rules (no DOM, timers or clock). State, tick, actions, offline catch-up, the mini-game.
 - `src/storage/`: saving and loading the pet in localStorage.
 - `src/ui/`: canvas rendering, sprites, button and menu logic, sound.
+- `scripts/`: dev tools (the balance simulation).
 - `tests/`: unit tests.
 - `e2e/`: Playwright browser test.
 - `docs/superpowers/`: design specs and implementation plans.
