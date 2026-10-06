@@ -18,7 +18,7 @@ export function withAttention(state) {
   const alive = state.stage !== 'dead' && state.stage !== 'egg';
   const needy = state.hunger === 0 || state.happiness === 0 || state.sick ||
     state.poop >= 2 || state.misbehaving;
-  const needsAttention = alive && (state.asleep ? state.lightOn : needy);
+  const needsAttention = Boolean(alive && (state.asleep ? state.lightOn : needy));
   return { ...state, needsAttention };
 }
 
@@ -27,6 +27,6 @@ export function createPet() {
     stage: 'egg', character: null, ageMinutes: 0, clock: START_CLOCK,
     hunger: 4, happiness: 4, discipline: 0, weight: 5, poop: 0,
     sick: false, doses: 0, asleep: false, lightOn: true, misbehaving: false,
-    careMistakes: 0, lowMinutes: 0, neglectMinutes: 0, needsAttention: false,
+    careMistakes: 0, lowMinutes: 0, ignoredMinutes: 0, neglectMinutes: 0, needsAttention: false,
   });
 }

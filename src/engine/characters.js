@@ -1,6 +1,10 @@
+import {
+  SPARKY_MAX_MISTAKES, SPARKY_MIN_DISCIPLINE, BUBBLES_MAX_MISTAKES, MOCHI_MAX_MISTAKES,
+} from './constants.js';
+
 export function chooseCharacter({ careMistakes, discipline }) {
-  if (careMistakes <= 1 && discipline >= 3) return 'sparky';
-  if (careMistakes <= 3) return 'bubbles';
-  if (careMistakes <= 6) return 'mochi';
+  if (careMistakes <= SPARKY_MAX_MISTAKES && discipline >= SPARKY_MIN_DISCIPLINE) return 'sparky';
+  if (careMistakes <= BUBBLES_MAX_MISTAKES) return 'bubbles';
+  if (careMistakes <= MOCHI_MAX_MISTAKES) return 'mochi';
   return 'grumble';
 }

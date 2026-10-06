@@ -1,4 +1,5 @@
 import { ICONS, spriteFor } from './sprites.js';
+import { petOffset } from './pose.js';
 
 export const LCD = 32;
 const INK = '#2b3320';
@@ -28,10 +29,11 @@ function drawMain(ctx, pet, frame) {
     }
     return;
   }
-  const bob = pet.stage === 'dead' || pet.asleep ? 0 : frame % 2;
-  drawBitmap(ctx, spriteFor(pet), 8, 8 + bob);
+  const { dx, dy } = petOffset(pet, frame);
+  drawBitmap(ctx, spriteFor(pet), 8 + dx, 8 + dy);
   for (let i = 0; i < pet.poop; i++) drawBitmap(ctx, ICONS.poop, 1 + i * 8, 25);
   if (pet.sick) drawBitmap(ctx, ICONS.cross, 1, 1);
+  if (pet.hunger === 0 && pet.stage !== 'dead' && pet.stage !== 'egg') drawBitmap(ctx, ICONS.heartEmpty, 1, 8);
   if (pet.needsAttention && frame % 2 === 0) drawBitmap(ctx, ICONS.bang, 28, 1);
 }
 

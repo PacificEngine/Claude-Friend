@@ -72,6 +72,21 @@ function guess(ui, pet, button, rng) {
   return { ui: { ...ui, screen: 'result', rounds, result, notice }, pet: applyGameResult(pet, result) };
 }
 
+// Pure: should a tick that changed the pet close the open screen?
+// A sick pet can't play, but may still check status or feed.
+export function shouldResetScreen(pet, ui) {
+  if (ui.screen === 'main') return false;
+  if (pet.stage === 'dead' || pet.asleep) return true;
+  return pet.sick && ui.screen === 'guess';
+}
+
+// Pure: pointing at an icon only moves the selection; B still runs it.
+export function selectMenu(ui, name) {
+  const menuIndex = MENU.indexOf(name);
+  if (ui.screen !== 'main' || menuIndex < 0) return ui;
+  return { ...ui, menuIndex, notice: null };
+}
+
 const HANDLERS = { main, feed, guess, result: backToMain, status: backToMain };
 
 export function press(ui, pet, button, rng) {
