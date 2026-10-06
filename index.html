@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Virtual Pet</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <ul class="icons" aria-label="Menu">
+      <li data-menu="feed" title="Feed">🍙</li>
+      <li data-menu="light" title="Light">💡</li>
+      <li data-menu="play" title="Play">🎮</li>
+      <li data-menu="medicine" title="Medicine">💉</li>
+      <li data-menu="clean" title="Clean">🚽</li>
+      <li data-menu="status" title="Status">📊</li>
+      <li data-menu="discipline" title="Discipline">📣</li>
+    </ul>
+    <div class="screen">
+      <canvas id="lcd" width="32" height="32" aria-label="Pet screen"></canvas>
+    </div>
+    <div class="buttons">
+      <button data-button="A" aria-label="Button A (cycle)">A</button>
+      <button data-button="B" aria-label="Button B (select)">B</button>
+      <button data-button="C" aria-label="Button C (cancel)">C</button>
+    </div>
+    <button id="mute" class="mute" aria-pressed="false">Sound: on</button>
+  </main>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

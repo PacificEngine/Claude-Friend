@@ -1,0 +1,17 @@
+{
+  "name": "clade-pets",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "serve -l 4173 .",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "serve": "^14.2.6",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
+}

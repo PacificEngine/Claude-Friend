@@ -7,9 +7,9 @@ A browser game that recreates the 90s handheld virtual pet: an egg hatches, grow
 Three layers with one-way dependencies: `ui -> engine`, `storage -> engine`. The engine depends on nothing.
 
 ### Engine (`src/engine/`) — pure logic, no DOM, no timers, no `Date.now()`
-- `createPet(rng)` returns the initial state (an egg).
+- `createPet()` returns the initial state (an egg).
 - `tick(state, rng)` advances one game minute and returns a new state. Never mutates.
-- `act(state, action, rng)` applies a player action: `feed-meal`, `feed-snack`, `play`, `clean`, `medicine`, `discipline`, `toggle-light`.
+- `act(state, action)` applies a player action: `feed-meal`, `feed-snack`, `play`, `clean`, `medicine`, `discipline`, `toggle-light`.
 - `advance(state, minutes, rng)` calls `tick` repeatedly (used for offline catch-up).
 - `rng` is an injected function returning a float in [0,1). A seeded implementation (`mulberry32`) is used in tests and the game, so behavior is repeatable.
 
@@ -32,9 +32,9 @@ Three layers with one-way dependencies: `ui -> engine`, `storage -> engine`. The
 
 ### UI (`src/ui/`, `index.html`, `styles.css`)
 - Plastic egg-shaped shell in CSS with a 32×16 LCD `<canvas>` scaled by integer factors, and three buttons A/B/C.
-- `sprites.js`: 1-bit bitmaps as string arrays for each stage/character/animation frame, plus icon row (feed, light, play, medicine, clean, status, discipline) and attention icon.
+- `sprites.js`: 1-bit bitmaps as string arrays for each stage/character/animation frame, plus the attention icon. Teen and adult share one sprite per character. The icon row (feed, light, play, medicine, clean, status, discipline) is HTML in the shell, not canvas.
 - `render.js`: draws a state to the canvas (no logic).
-- `controller.js`: maps buttons to menu navigation and engine actions. A cycles the icon, B selects, C cancels. Runs a 1-second interval that ticks the engine on a game-minute schedule and saves.
+- `controller.js`: maps buttons to menu navigation and engine actions. A cycles the icon, B selects, C cancels. Runs a 1-second interval that ticks the engine on a game-minute schedule and saves. A `?speed=N` debug query param multiplies game speed (N game minutes per tick) for manual testing.
 - `sound.js`: Web Audio synthesized beeps (attention call, button, win/lose). Muted until the first user interaction, and has a mute toggle.
 
 ## Testing
