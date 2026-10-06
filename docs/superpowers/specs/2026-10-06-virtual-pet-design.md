@@ -13,7 +13,7 @@ Three layers with one-way dependencies: `ui -> engine`, `storage -> engine`. The
 - `advance(state, minutes, rng)` calls `tick` repeatedly (used for offline catch-up).
 - `rng` is an injected function returning a float in [0,1). A seeded implementation (`mulberry32`) is used in tests and the game, so behavior is repeatable.
 
-**State:** `stage` (egg | baby | child | teen | adult | dead), `character` (id once teen/adult), `ageMinutes`, `hunger` (0–4 hearts), `happiness` (0–4), `discipline` (0–4), `weight`, `poop` (count), `sick`, `asleep`, `lightOn`, `careMistakes`, `needsAttention`, `neglectMinutes`.
+**State:** `stage` (egg | baby | child | teen | adult | dead), `character` (id once teen/adult), `ageMinutes`, `hunger` (0–4 hearts), `happiness` (0–4), `discipline` (0–4), `weight`, `poop` (count), `sick`, `asleep`, `lightOn`, `careMistakes`, `needsAttention`, `neglectMinutes`, `ignoredMinutes`.
 
 **Rules (initial tuning, constants in one file so they are easy to adjust):**
 - Hunger and happiness each lose one heart on a fixed interval per stage.

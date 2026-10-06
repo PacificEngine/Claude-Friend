@@ -18,7 +18,7 @@ export function withAttention(state) {
   const alive = state.stage !== 'dead' && state.stage !== 'egg';
   const needy = state.hunger === 0 || state.happiness === 0 || state.sick ||
     state.poop >= 2 || state.misbehaving;
-  const needsAttention = alive && (state.asleep ? state.lightOn : needy);
+  const needsAttention = Boolean(alive && (state.asleep ? state.lightOn : needy));
   return { ...state, needsAttention };
 }
 

@@ -1,16 +1,15 @@
 import { mulberry32 } from './engine/rng.js';
 import { tick } from './engine/tick.js';
 import { advance } from './engine/advance.js';
-import { MAX_OFFLINE_MINUTES } from './engine/constants.js';
+import { MAX_OFFLINE_MINUTES, SUSPENDED_AFTER_MINUTES } from './engine/constants.js';
 import { load, save } from './storage/storage.js';
 import { render } from './ui/render.js';
-import { createUi, press, MENU } from './ui/controller.js';
+import { createUi, press, MENU, shouldResetScreen } from './ui/controller.js';
 import { createSound } from './ui/sound.js';
 
 const speed = Number(new URLSearchParams(location.search).get('speed')) || 60; // ?speed=1 is real time
 const MS_PER_MINUTE = 60000 / speed;
 const NOTICE_MS = 2500;
-const SUSPENDED_AFTER = 60; // game minutes
 
 const rng = mulberry32(Date.now());
 const sound = createSound();
@@ -46,11 +45,11 @@ function step() {
   if (due > 0) {
     const wasCalling = pet.needsAttention;
     // A suspended tab returns with a big backlog: replay it capped, like a reload.
-    if (due > SUSPENDED_AFTER) pet = advance(pet, Math.min(due, MAX_OFFLINE_MINUTES), rng);
+    if (due > SUSPENDED_AFTER_MINUTES) pet = advance(pet, Math.min(due, MAX_OFFLINE_MINUTES), rng);
     else for (let i = 0; i < due; i++) pet = tick(pet, rng);
     lastTick += due * MS_PER_MINUTE;
-    // A death, bedtime or illness takes over the pet; don't leave a stale menu screen up.
-    if ((pet.stage === 'dead' || pet.asleep || pet.sick) && ui.screen !== 'main') ui = createUi();
+    // A death, bedtime or illness can take over the pet; don't leave a stale screen up.
+    if (shouldResetScreen(pet, ui)) ui = createUi();
     if (pet.needsAttention && !wasCalling) sound.beep('call');
     persist();
   }

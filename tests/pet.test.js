@@ -52,6 +52,8 @@ describe('withAttention', () => {
   });
   it('does not call when fine, asleep, an egg or dead', () => {
     expect(withAttention(base).needsAttention).toBe(false);
+    const { misbehaving, ...partial } = base;
+    expect(withAttention(partial).needsAttention).toBe(false);
     expect(withAttention({ ...base, hunger: 0, asleep: true, lightOn: false }).needsAttention).toBe(false);
     expect(withAttention({ ...base, stage: 'egg', hunger: 0 }).needsAttention).toBe(false);
     expect(withAttention({ ...base, stage: 'dead', hunger: 0 }).needsAttention).toBe(false);

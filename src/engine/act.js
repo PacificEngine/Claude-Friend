@@ -23,6 +23,7 @@ const ACTIONS = {
   'toggle-light': (s) => (s.asleep ? { ...s, lightOn: !s.lightOn } : s),
 };
 
+// No-ops return the original state object so callers can detect "nothing happened" by identity.
 export function act(state, action) {
   if (state.stage === 'egg' || state.stage === 'dead') return state;
   const handler = ACTIONS[action];

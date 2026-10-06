@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { MENU, createUi, press, describeAction } from '../src/ui/controller.js';
+import { MENU, createUi, press, describeAction, shouldResetScreen } from '../src/ui/controller.js';
 import { petAt } from './helpers.js';
 
 const low = () => 0.1; // left
@@ -41,6 +41,32 @@ describe('controller', () => {
     const asleep = petAt('child', { asleep: true, lightOn: true });
     const { pet: dark } = press(select(createUi(), 'light'), asleep, 'B', low);
     expect(dark.lightOn).toBe(false);
+    const sick = petAt('child', { sick: true });
+    const { pet: dosed } = press(select(createUi(), 'medicine'), sick, 'B', low);
+    expect(dosed.doses).toBe(1);
+    const bad = petAt('child', { misbehaving: true });
+    const { pet: scolded } = press(select(createUi(), 'discipline'), bad, 'B', low);
+    expect(scolded).toMatchObject({ misbehaving: false, discipline: 1 });
+  });
+
+  describe('shouldResetScreen', () => {
+    const on = (screen) => ({ ...createUi(), screen });
+    it('never resets the main screen', () => {
+      expect(shouldResetScreen(petAt('child', { asleep: true }), on('main'))).toBe(false);
+    });
+    it('resets any open screen for a dead or sleeping pet', () => {
+      expect(shouldResetScreen(petAt('adult', { stage: 'dead' }), on('status'))).toBe(true);
+      expect(shouldResetScreen(petAt('child', { asleep: true }), on('feed'))).toBe(true);
+    });
+    it('a sick pet only loses the guess screen', () => {
+      const sick = petAt('child', { sick: true });
+      expect(shouldResetScreen(sick, on('guess'))).toBe(true);
+      expect(shouldResetScreen(sick, on('status'))).toBe(false);
+      expect(shouldResetScreen(sick, on('feed'))).toBe(false);
+    });
+    it('leaves a healthy awake pet alone', () => {
+      expect(shouldResetScreen(petAt('child'), on('guess'))).toBe(false);
+    });
   });
 
   it('status screen opens and any button closes it', () => {

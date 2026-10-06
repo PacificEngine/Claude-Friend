@@ -30,7 +30,7 @@ describe('act', () => {
 
   it('a sick pet will not play', () => {
     const sick = petAt('child', { happiness: 2, sick: true });
-    expect(act(sick, 'play')).toEqual(sick);
+    expect(act(sick, 'play')).toBe(sick);
   });
 
   it('cleaning removes all poop and clears the attention call', () => {
@@ -46,14 +46,14 @@ describe('act', () => {
 
   it('medicine does nothing for a healthy pet', () => {
     const s = petAt('child');
-    expect(act(s, 'medicine')).toEqual(s);
+    expect(act(s, 'medicine')).toBe(s);
   });
 
   it('discipline only works on a misbehaving pet', () => {
     const bad = act(petAt('child', { misbehaving: true, discipline: 1 }), 'discipline');
     expect(bad).toMatchObject({ misbehaving: false, discipline: 2 });
     const good = petAt('child', { discipline: 1 });
-    expect(act(good, 'discipline')).toEqual(good);
+    expect(act(good, 'discipline')).toBe(good);
   });
 
   it('toggles the light only while asleep', () => {
