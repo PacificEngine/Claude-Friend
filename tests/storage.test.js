@@ -31,6 +31,12 @@ describe('storage', () => {
     expect(load(10 * MIN, never, storage).ageMinutes).toBe(5 + 10);
   });
 
+  it('replays at the caller-supplied scale so offline matches the live loop', () => {
+    const storage = fakeStorage();
+    save(petAt('baby'), 0, storage);
+    expect(load(10 * 1000, never, storage, 1000).ageMinutes).toBe(5 + 10);
+  });
+
   it('caps how much time is replayed after a long absence', () => {
     const storage = fakeStorage();
     save(petAt('baby'), 0, storage);

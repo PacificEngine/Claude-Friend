@@ -34,7 +34,7 @@ Three layers with one-way dependencies: `ui -> engine`, `storage -> engine`. The
 - Plastic egg-shaped shell in CSS with a 32×16 LCD `<canvas>` scaled by integer factors, and three buttons A/B/C.
 - `sprites.js`: 1-bit bitmaps as string arrays for each stage/character/animation frame, plus the attention icon. Teen and adult share one sprite per character. The icon row (feed, light, play, medicine, clean, status, discipline) is HTML in the shell, not canvas.
 - `render.js`: draws a state to the canvas (no logic).
-- `controller.js`: maps buttons to menu navigation and engine actions. A cycles the icon, B selects, C cancels. Runs a 1-second interval that ticks the engine on a game-minute schedule and saves. A `?speed=N` debug query param multiplies game speed (N game minutes per tick) for manual testing.
+- `controller.js`: maps buttons to menu navigation and engine actions. A cycles the icon, B selects, C cancels. Runs a 1-second interval that ticks the engine on a game-minute schedule and saves. A `?speed=N` query param multiplies game speed: the default is 60 (one game minute is about one real second); `?speed=1` is real time (one game minute per real minute).
 - `sound.js`: Web Audio synthesized beeps (attention call, button, win/lose). Muted until the first user interaction, and has a mute toggle.
 
 ## Testing

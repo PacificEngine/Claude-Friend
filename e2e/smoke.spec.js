@@ -15,8 +15,8 @@ test('egg hatches, can be fed, and survives a reload', async ({ page }) => {
   await page.click('[data-button="B"]'); // choose meal
   await expect(lcd).toHaveAttribute('data-hunger', '4');
 
-  // Reload at real speed: a lost save would give a fresh egg, not a fed baby.
-  await page.goto('/');
+  // Reload at real speed (the default is fast): a lost save would give a fresh egg, not a fed baby.
+  await page.goto('/?speed=1');
   await expect(lcd).toHaveAttribute('data-stage', 'baby');
   await expect(lcd).toHaveAttribute('data-hunger', '4');
 

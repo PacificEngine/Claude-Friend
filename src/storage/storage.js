@@ -3,7 +3,7 @@ import { createPet } from '../engine/pet.js';
 import { MAX_OFFLINE_MINUTES } from '../engine/constants.js';
 
 const KEY = 'virtual-pet';
-const MS_PER_MINUTE = 60000;
+const REAL_MS_PER_MINUTE = 60000;
 
 const STAGES = ['egg', 'baby', 'child', 'teen', 'adult', 'dead'];
 
@@ -15,13 +15,13 @@ export function save(state, nowMs, storage = localStorage) {
   storage.setItem(KEY, JSON.stringify({ state, savedAt: nowMs }));
 }
 
-export function load(nowMs, rng, storage = localStorage) {
+export function load(nowMs, rng, storage = localStorage, msPerMinute = REAL_MS_PER_MINUTE) {
   try {
     const raw = storage.getItem(KEY);
     if (!raw) return createPet();
     const { state, savedAt } = JSON.parse(raw);
     if (!isPetState(state) || !Number.isFinite(savedAt)) return createPet();
-    const elapsed = Math.floor((nowMs - savedAt) / MS_PER_MINUTE);
+    const elapsed = Math.floor((nowMs - savedAt) / msPerMinute);
     const minutes = Math.min(MAX_OFFLINE_MINUTES, Math.max(0, elapsed));
     return advance(state, minutes, rng);
   } catch {

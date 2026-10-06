@@ -7,7 +7,7 @@ import { render } from './ui/render.js';
 import { createUi, press, MENU } from './ui/controller.js';
 import { createSound } from './ui/sound.js';
 
-const speed = Number(new URLSearchParams(location.search).get('speed')) || 1;
+const speed = Number(new URLSearchParams(location.search).get('speed')) || 60; // ?speed=1 is real time
 const MS_PER_MINUTE = 60000 / speed;
 const SUSPENDED_AFTER = 60; // game minutes
 
@@ -16,7 +16,7 @@ const sound = createSound();
 const canvas = document.getElementById('lcd');
 const ctx = canvas.getContext('2d');
 
-let pet = load(Date.now(), rng);
+let pet = load(Date.now(), rng, localStorage, MS_PER_MINUTE);
 let ui = createUi();
 let lastTick = Date.now();
 
