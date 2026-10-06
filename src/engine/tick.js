@@ -38,11 +38,15 @@ function neglect(s) {
   const low = s.hunger === 0 || s.happiness === 0;
   const lowMinutes = low ? s.lowMinutes + 1 : 0;
   const mistake = lowMinutes === CARE_MISTAKE_GRACE ? 1 : 0;
+  const calling = s.sick || s.poop >= 2 || s.misbehaving;
+  const ignoredMinutes = calling ? (s.ignoredMinutes ?? 0) + 1 : 0;
+  const ignored = ignoredMinutes === CARE_MISTAKE_GRACE ? 1 : 0;
   const starving = s.hunger === 0 || s.sick;
   return {
     ...s,
     lowMinutes,
-    careMistakes: s.careMistakes + mistake,
+    ignoredMinutes,
+    careMistakes: s.careMistakes + mistake + ignored,
     neglectMinutes: starving ? s.neglectMinutes + 1 : 0,
   };
 }

@@ -68,3 +68,13 @@ describe('storage', () => {
     }
   });
 });
+
+describe('storage migration', () => {
+  it('loads a save from before ignoredMinutes existed and ticks without NaN', () => {
+    const { ignoredMinutes, ...old } = petAt('child', { sick: true });
+    const storage = fakeStorage({ 'virtual-pet': JSON.stringify({ state: old, savedAt: 0 }) });
+    const loaded = load(5 * MIN, never, storage);
+    expect(loaded.ignoredMinutes).toBe(5);
+    expect(Number.isNaN(loaded.careMistakes)).toBe(false);
+  });
+});

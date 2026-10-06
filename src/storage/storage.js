@@ -23,7 +23,8 @@ export function load(nowMs, rng, storage = localStorage, msPerMinute = REAL_MS_P
     if (!isPetState(state) || !Number.isFinite(savedAt)) return createPet();
     const elapsed = Math.floor((nowMs - savedAt) / msPerMinute);
     const minutes = Math.min(MAX_OFFLINE_MINUTES, Math.max(0, elapsed));
-    return advance(state, minutes, rng);
+    // Saves from older versions lack newer fields; fill them from defaults.
+    return advance({ ...createPet(), ...state }, minutes, rng);
   } catch {
     return createPet();
   }
