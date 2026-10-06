@@ -23,6 +23,15 @@ describe('sprites', () => {
     expect(spriteFor({ stage: 'child' })).toBe(SPRITES.child);
     expect(spriteFor({ stage: 'dead' })).toBe(SPRITES.dead);
     expect(spriteFor({ stage: 'teen', character: 'mochi' })).toBe(SPRITES.mochi);
-    expect(spriteFor({ stage: 'adult', character: 'sparky' })).toBe(SPRITES.sparky);
+    expect(spriteFor({ stage: 'teen', character: 'sparky' })).toBe(SPRITES.sparky);
+    expect(spriteFor({ stage: 'baby' })).toBe(SPRITES.baby);
+  });
+
+  it('adults get their own art, keyed <character>Adult', () => {
+    for (const character of ['sparky', 'bubbles', 'mochi', 'grumble']) {
+      expect(spriteFor({ stage: 'adult', character })).toBe(SPRITES[`${character}Adult`]);
+      expect(SPRITES[`${character}Adult`], character).toBeDefined();
+      expect(SPRITES[`${character}Adult`], character).not.toEqual(SPRITES[character]);
+    }
   });
 });
