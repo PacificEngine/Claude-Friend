@@ -78,3 +78,69 @@ test('music toggle works independently of sound and persists across a reload', a
 
   expect(errors).toEqual([]);
 });
+
+test('Play opens a chooser for two mini-games; C cancels back to main', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+
+  await page.goto('/?speed=600'); // an egg refuses to play, so hatch it first
+  const lcd = page.locator('#lcd');
+  await expect(lcd).toHaveAttribute('data-stage', 'baby', { timeout: 5000 });
+  await page.goto('/?speed=1'); // then stop the clock from interfering
+
+  await page.click('button[data-menu="play"]');
+  await page.click('[data-button="B"]');
+  await expect(lcd).toHaveAttribute('data-screen', 'play');
+  await expect(lcd).toHaveAttribute('aria-label', /Play menu: Left or Right selected/);
+
+  await page.click('[data-button="C"]');
+  await expect(lcd).toHaveAttribute('data-screen', 'main');
+
+  await page.click('[data-button="B"]');
+  await page.click('[data-button="A"]'); // toggle to Higher or Lower
+  await expect(lcd).toHaveAttribute('aria-label', /Higher or Lower selected/);
+  await page.click('[data-button="B"]');
+  await expect(lcd).toHaveAttribute('data-screen', 'highlow');
+  await expect(lcd).toHaveAttribute('aria-label', /Higher or lower: number [1-9], round 1 of 3/);
+
+  await page.click('[data-button="C"]');
+  await expect(lcd).toHaveAttribute('data-screen', 'main');
+
+  expect(errors).toEqual([]);
+});
+
+test('New egg asks first, then starts over; Cancel changes nothing', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+
+  await page.goto('/?speed=60'); // the egg hatches in about 5 s
+  const lcd = page.locator('#lcd');
+  const dialog = page.locator('#new-egg-dialog');
+  await expect(lcd).toHaveAttribute('data-stage', 'baby', { timeout: 15000 });
+
+  await page.click('#new-egg');
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText('Start over with a new egg? Your current pet will be lost.');
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(lcd).toHaveAttribute('data-stage', 'baby');
+
+  await page.click('#new-egg');
+  await page.keyboard.press('Escape');
+  await expect(dialog).not.toBeVisible();
+  await expect(lcd).toHaveAttribute('data-stage', 'baby');
+
+  await page.click('#new-egg');
+  await dialog.getByRole('button', { name: 'Start over' }).click();
+  await expect(lcd).toHaveAttribute('data-stage', 'egg');
+  await expect(page.locator('#notice')).toHaveText('A new egg!');
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('virtual-pet')));
+  expect(saved.state.stage).toBe('egg');
+  expect(saved.state.ageMinutes).toBeLessThan(2);
+
+  // The sound and music toggles are untouched by all of this.
+  await expect(page.locator('#mute')).toHaveText('Sound: on');
+  await expect(page.locator('#music')).toHaveText('Music: on');
+
+  expect(errors).toEqual([]);
+});

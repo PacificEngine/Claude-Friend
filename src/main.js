@@ -4,7 +4,7 @@ import { advance } from './engine/advance.js';
 import { MAX_OFFLINE_MINUTES, SUSPENDED_AFTER_MINUTES, DEFAULT_SPEED } from './engine/constants.js';
 import { loadPet, save } from './storage/storage.js';
 import { render } from './ui/render.js';
-import { createUi, press, MENU, shouldResetScreen, selectMenu } from './ui/controller.js';
+import { createUi, press, MENU, shouldResetScreen, selectMenu, startOver } from './ui/controller.js';
 import { describePet } from './ui/describe.js';
 import { createSound } from './ui/sound.js';
 import { createMusic } from './ui/music.js';
@@ -106,7 +106,9 @@ document.querySelectorAll('[data-menu]').forEach((el) => {
     draw();
   });
 });
+const newEggDialog = document.getElementById('new-egg-dialog');
 document.addEventListener('keydown', (e) => {
+  if (newEggDialog.open) return; // keys belong to the dialog while it is up
   const key = e.key.toUpperCase();
   if (['A', 'B', 'C'].includes(key)) onButton(key);
 });
@@ -129,6 +131,20 @@ function bindToggle(id, label, key, apply) {
 }
 bindToggle('mute', 'Sound', 'sound', (on) => sound.setMuted(!on));
 bindToggle('music', 'Music', 'music', (on) => music.setEnabled(on));
+
+// returnValue survives a close, so clear it or a later Escape would repeat the last answer.
+document.getElementById('new-egg').addEventListener('click', () => {
+  newEggDialog.returnValue = '';
+  newEggDialog.showModal();
+});
+newEggDialog.addEventListener('close', () => {
+  if (newEggDialog.returnValue !== 'confirm') return;
+  ({ ui, pet } = startOver());
+  lastTick = Date.now();
+  persist();
+  draw();
+  showNotice('A new egg!');
+});
 
 // Browsers may freeze or discard a hidden tab without another tick, so save when leaving.
 document.addEventListener('visibilitychange', () => {
